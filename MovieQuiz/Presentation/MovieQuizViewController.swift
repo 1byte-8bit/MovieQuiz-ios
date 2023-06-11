@@ -52,6 +52,13 @@ final class MovieQuizViewController: UIViewController {
     @IBOutlet private var imageView: UIImageView!
     @IBOutlet private var textLabel: UILabel!
     @IBOutlet private var counterLabel: UILabel!
+    @IBOutlet private weak var noButton: UIButton!
+    @IBOutlet private weak var yesButton: UIButton!
+    
+    // Делает содержимое статус бара светлым
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
 
     
     // MARK: - Lifecycle
@@ -60,6 +67,8 @@ final class MovieQuizViewController: UIViewController {
         
         let currentQuestionModel = questions[currentQuestionIndex]
         let currentQuestion = convert(model: currentQuestionModel)
+        
+        imageView.layer.cornerRadius = 20 // радиус скругления углов рамки
         
         show(quiz: currentQuestion)
     }
@@ -92,14 +101,15 @@ final class MovieQuizViewController: UIViewController {
         textLabel.text = step.question
         counterLabel.text = step.questionNumber
         
-        imageView.layer.masksToBounds = true // даём разрешение на рисование рамки
-        imageView.layer.borderWidth = 1 // толщина рамки
-        imageView.layer.borderColor = UIColor.white.cgColor // делаем рамку белой
-        imageView.layer.cornerRadius = 20 // радиус скругления углов рамки
+        imageView.layer.borderWidth = .nan // толщина рамки
+        
     }
     
     // приватный метод, который меняет цвет рамки
     private func showAnswerResult(isCorrect: Bool) {
+        noButton.isEnabled = false
+        yesButton.isEnabled = false
+        
        // метод красит рамку
         imageView.layer.borderWidth = 8
         if isCorrect {
@@ -162,13 +172,16 @@ final class MovieQuizViewController: UIViewController {
             show(quiz: nextQuestion)
         }
         
+        self.noButton.isEnabled = true
+        self.yesButton.isEnabled = true
+        
       }
 
 }
 
 struct QuizQuestion {
-  // строка с названием фильма,
-  // совпадает с названием картинки афиши фильма в Assets
+  /// строка с названием фильма,
+  /// совпадает с названием картинки афиши фильма в Assets
   let image: String
   // строка с вопросом о рейтинге фильма
   let text: String
