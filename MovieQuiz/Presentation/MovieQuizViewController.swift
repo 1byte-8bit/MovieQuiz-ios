@@ -1,12 +1,17 @@
 import UIKit
 
-final class MovieQuizViewController: UIViewController {
+final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
+    /*
+     Question Factory передана Инъекцией через свойство
+     а делегат организован в нем Агрегацией (метод связи)
+     т.е. через параметр в инициализаторе
+     */
     
     private var currentQuestionIndex = 0
     // переменная со счётчиком правильных ответов
     private var correctAnswers = 0
     private let questionsAmount: Int = 10
-    private let questionFactory: QuestionFactoryProtocol = QuestionFactory()
+    private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
     
     @IBOutlet private var imageView: UIImageView!
@@ -27,13 +32,17 @@ final class MovieQuizViewController: UIViewController {
         
         imageView.layer.cornerRadius = 20 // радиус скругления углов рамки
         
-        if let firstQuestion = questionFactory.requestNextQuestion() {
-            currentQuestion = firstQuestion
-            let viewModel = convert(model: firstQuestion)
-            show(quiz: viewModel)
-        }
+        questionFactory = QuestionFactory(delegate: self)
+        
+//        if let firstQuestion = questionFactory.requestNextQuestion() {
+//            currentQuestion = firstQuestion
+//            let viewModel = convert(model: firstQuestion)
+//            show(quiz: viewModel)
+//        }
+        questionFactory?.requestNextQuestion()
     }
     
+    // MARK: - Actions
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
         guard let currentQuestion = currentQuestion else {
             return
@@ -50,6 +59,7 @@ final class MovieQuizViewController: UIViewController {
         showAnswerResult(isCorrect: currentQuestion.correctAnswer == answer)
     }
     
+    // MARK: - Private functions
     // метод конвертации, который принимает моковый вопрос и возвращает вью модель для экрана вопроса
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
         let question = QuizStepViewModel(
@@ -106,12 +116,7 @@ final class MovieQuizViewController: UIViewController {
             self.currentQuestionIndex = 0
             self.correctAnswers = 0
             
-            if let nextQuestion = self.questionFactory.requestNextQuestion() {
-                self.currentQuestion = nextQuestion
-                let viewModel = self.convert(model: nextQuestion)
-                
-                self.show(quiz: viewModel)
-            }
+            self.questionFactory?.requestNextQuestion()
         }
         
         resultsAlert.addAction(action)
@@ -137,25 +142,36 @@ final class MovieQuizViewController: UIViewController {
         } else {
             currentQuestionIndex += 1
             // идём в состояние "Вопрос показан"
-            if let nextQuestion = questionFactory.requestNextQuestion() {
-                currentQuestion = nextQuestion
-                let viewModel = convert(model: nextQuestion)
-                
-                show(quiz: viewModel)
-            }
+//            if let nextQuestion = questionFactory.requestNextQuestion() {
+//                currentQuestion = nextQuestion
+//                let viewModel = convert(model: nextQuestion)
+//
+//                show(quiz: viewModel)
+//            }
+            
+            questionFactory?.requestNextQuestion()
         }
         
         self.noButton.isEnabled = true
         self.yesButton.isEnabled = true
         
       }
+    
+    // MARK: - QuestionFactoryDelegate
+    func didReceiveNextQuestion(question: QuizQuestion?) {
+        guard let question = question else {
+            return
+        }
+        
+        currentQuestion = question
+        let viewModel = convert(model: question)
+        
+        DispatchQueue.main.async { [weak self] in
+            self?.show(quiz: viewModel)
+        }
+    }
 
 }
-
-
-
-
-
 
 
 
