@@ -8,6 +8,8 @@
 import UIKit
 
 
-class AlertPresenter {
-    
+class AlertPresenter: UIViewController {
+    func showResult() {
+        
+    }
 }
