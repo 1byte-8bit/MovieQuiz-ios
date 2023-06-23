@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A81BF4682A463569001D00F2 /* Movie.swift in Sources */ = {isa = PBXBuildFile; fileRef = A81BF4672A463569001D00F2 /* Movie.swift */; };
 		A87FDE332A425C6C0018F290 /* QuestionFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A87FDE322A425C6C0018F290 /* QuestionFactory.swift */; };
 		A87FDE362A4260040018F290 /* QuizStepViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A87FDE352A4260040018F290 /* QuizStepViewModel.swift */; };
 		A87FDE382A4260190018F290 /* QuizResultsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A87FDE372A4260190018F290 /* QuizResultsViewModel.swift */; };
@@ -29,6 +30,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A81BF4672A463569001D00F2 /* Movie.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Movie.swift; sourceTree = "<group>"; };
 		A87FDE322A425C6C0018F290 /* QuestionFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionFactory.swift; sourceTree = "<group>"; };
 		A87FDE352A4260040018F290 /* QuizStepViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizStepViewModel.swift; sourceTree = "<group>"; };
 		A87FDE372A4260190018F290 /* QuizResultsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizResultsViewModel.swift; sourceTree = "<group>"; };
@@ -101,6 +103,7 @@
 				A87FDE372A4260190018F290 /* QuizResultsViewModel.swift */,
 				A87FDE392A4260280018F290 /* QuizQuestion.swift */,
 				A87FDE412A4372FE0018F290 /* AlertModel.swift */,
+				A81BF4672A463569001D00F2 /* Movie.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -250,6 +253,7 @@
 				AD1ABAB22831907B00B3E448 /* AppDelegate.swift in Sources */,
 				A87FDE382A4260190018F290 /* QuizResultsViewModel.swift in Sources */,
 				AD1ABAB42831907B00B3E448 /* SceneDelegate.swift in Sources */,
+				A81BF4682A463569001D00F2 /* Movie.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
