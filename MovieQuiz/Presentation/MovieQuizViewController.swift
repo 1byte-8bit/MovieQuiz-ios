@@ -44,13 +44,15 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         let fileManager = FileManager.default
         guard var docs = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {return}
         
-        docs.appendPathComponent("inception.json")
+        docs.appendPathComponent("top250MoviesIMDB.json")
         
         var jsonString = ""
         jsonString = try! fileManager.fileExists(atPath: docs.path) ? String(contentsOf: docs) : ""
         
-        if let movie = getMovie(from: jsonString) {
-            print(movie)
+        if let top = getMovie(from: jsonString) {
+            let dbItems = top.items[0]
+            
+            print(dbItems.crew)
         }
         
         imageView.layer.cornerRadius = 20 // радиус скругления углов рамки
@@ -194,75 +196,23 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         }
     }
     
-    func getMovie(from jsonString: String) -> Movie? {
+    func getMovie(from jsonString: String) -> Top? {
+        
+        var movie: Top? = nil
         
         guard let data = jsonString.data(using: .utf8) else {
             return nil
         }
         
         do {
-            let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
-            let actorList = json?["actorList"] as? [Any]
-            
-            var actors = [Actor]()
-            guard let actorsList = actorList else {return nil}
-            
-            for actor in actorsList {
-                if let actor = actor as? [String: Any] {
-                    if let id = actor["id"] as? String,
-                       let image = actor["image"] as? String,
-                       let name = actor["name"] as? String,
-                       let asCharacter = actor["asCharacter"] as? String {
-                        let actorInfo = Actor(
-                            id: id,
-                            image: image,
-                            name: name,
-                            asCharacter: asCharacter
-                        )
-                        actors.append(
-                            actorInfo
-                        )
-                    }
-                }
-            }
-            
-            print(actors)
-            
-            if let id = json?["id"] as? String,
-                let title = json?["title"] as? String,
-                let year = json?["year"] as? String,
-                let image = json?["image"] as? String,
-                let releaseDate = json?["releaseDate"] as? String,
-                let runtimeMins = json?["runtimeMins"] as? String,
-                let directors = json?["directors"] as? String {
+            let movieModel = try JSONDecoder().decode(Top.self, from: data)
 
-                print("Test")
-                print(type(of: year))
-                
-                guard let year = Int(year) else {return nil}
-                guard let runtimeMins = Int(runtimeMins) else {return nil}
-                
-
-                let movie = Movie(
-                    id: id,
-                    title: title,
-                    year: year,
-                    image: image,
-                    releaseDate: releaseDate,
-                    runtimeMins: runtimeMins,
-                    directors: directors,
-                    actorList: actors)
-
-                print("Movie: \(movie)")
-
-                return movie
-            }
-            
+            movie = movieModel
         } catch {
-            print("Failed to parse: \(jsonString)")
+            print("Failed to parse: \(error.localizedDescription)")
         }
         
-        return nil
+        return movie
     }
 
 }
