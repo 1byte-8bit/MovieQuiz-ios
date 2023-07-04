@@ -1,6 +1,7 @@
 import UIKit
 
 final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
+    
     /*
      Question Factory передана Инъекцией через свойство
      а делегат организован в нем Агрегацией (метод связи)
@@ -13,6 +14,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private let questionsAmount: Int = 10
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
+    private var alertPresenter: AlertPresenterProtocol?
+    private var statisticService: StatisticService?
     
     @IBOutlet private var imageView: UIImageView!
     @IBOutlet private var textLabel: UILabel!
@@ -30,41 +33,14 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-//        print(NSHomeDirectory())
-//        print(Bundle.main.bundlePath)
-        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        print(docs.scheme!)
-        if #available(iOS 16.0, *) {
-            print(docs.path(percentEncoded: true))
-        } else {
-            // Fallback on earlier versions
-            print(docs.path)
-        }
-        
-        let fileManager = FileManager.default
-        guard var docs = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {return}
-        
-        docs.appendPathComponent("top250MoviesIMDB.json")
-        
-        var jsonString = ""
-        jsonString = try! fileManager.fileExists(atPath: docs.path) ? String(contentsOf: docs) : ""
-        
-        if let top = getMovie(from: jsonString) {
-            let dbItems = top.items[0]
-            
-            print(dbItems.crew)
-        }
-        
         imageView.layer.cornerRadius = 20 // радиус скругления углов рамки
         
         questionFactory = QuestionFactory(delegate: self)
-        
-//        if let firstQuestion = questionFactory.requestNextQuestion() {
-//            currentQuestion = firstQuestion
-//            let viewModel = convert(model: firstQuestion)
-//            show(quiz: viewModel)
-//        }
         questionFactory?.requestNextQuestion()
+        
+        alertPresenter = AlertPresenter(mainViewController: self)
+        
+        statisticService = StatisticServiceImplementation()
     }
     
     // MARK: - Actions
@@ -127,52 +103,39 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         }
     }
     
-    private func showGameReault(quiz result: QuizResultsViewModel) {
-        let resultsAlert = UIAlertController(
-            title: result.title,
-            message: result.text,
-            preferredStyle: .alert
-        )
-        
-        let action = UIAlertAction(title: result.buttonText, style: .default){ [weak self] _ in
-            // код, который сбрасывает игру и показывает первый вопрос
-            guard let self = self else { return }
-            
-            self.currentQuestionIndex = 0
-            self.correctAnswers = 0
-            
-            self.questionFactory?.requestNextQuestion()
-        }
-        
-        resultsAlert.addAction(action)
-        
-        self.present(resultsAlert, animated: true, completion: nil)
-        
-    }
-    
     // приватный метод, который содержит логику перехода в один из сценариев
     private func showNextQuestionOrResults() {
         if currentQuestionIndex == questionsAmount - 1 {
             // идём в состояние "Результат квиза"
-            let message = "Ваш результат: \(correctAnswers)/\(questionsAmount) очков\n"
-                        + "Средняя точность: \(Float(correctAnswers) * 100 / 10)%"
+            statisticService?.store(correct: correctAnswers, total: questionsAmount)
             
-            let resultMessage = QuizResultsViewModel(
+            let accuracy = statisticService?.totalAccuracy ?? Double(correctAnswers) * 100 / 10
+            let gamesCount = statisticService?.gamesCount ?? 1
+            let gameRecord = statisticService?.bestGame
+            let date = gameRecord?.date ?? Date()
+            
+            let message = "Ваш результат: \(correctAnswers)/\(questionsAmount) очков\n"
+            + "Количество сыграных квизов: \(gamesCount)\n"
+            + "Рекорд: \(gameRecord?.correct ?? correctAnswers)/"
+            + "\(gameRecord?.total ?? questionsAmount) (\(date.dateTimeString))\n"
+            + "Средняя точность: \(String(format: "%.2f", accuracy))%"
+            
+            let resultMessage = AlertModel(
                 title: "Этот раунд окончен!",
-                text: message,
-                buttonText: "Сыграть еще раз"
+                message: message,
+                buttonText: "Сыграть еще раз",
+                completion: { [weak self] in
+                    guard let self = self else { return }
+                    self.currentQuestionIndex = 0
+                    self.correctAnswers = 0
+                    
+                    self.questionFactory?.requestNextQuestion()
+                }
             )
             
-            showGameReault(quiz: resultMessage)
+            alertPresenter?.showGameResult(with: resultMessage)
         } else {
             currentQuestionIndex += 1
-            // идём в состояние "Вопрос показан"
-//            if let nextQuestion = questionFactory.requestNextQuestion() {
-//                currentQuestion = nextQuestion
-//                let viewModel = convert(model: nextQuestion)
-//
-//                show(quiz: viewModel)
-//            }
             
             questionFactory?.requestNextQuestion()
         }
@@ -195,6 +158,17 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             self?.show(quiz: viewModel)
         }
     }
+
+}
+
+extension MovieQuizViewController {
+    func presentAlert(model: AlertModel?) {
+        self.present(self, animated: true)
+    }
+}
+
+
+extension MovieQuizViewController {
     
     func getMovie(from jsonString: String) -> Top? {
         
@@ -214,71 +188,4 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
         return movie
     }
-
 }
-
-
-
-/*
- Mock-данные
- 
- 
- Картинка: The Godfather
- Настоящий рейтинг: 9,2
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
-
-
- Картинка: The Dark Knight
- Настоящий рейтинг: 9
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
-
-
- Картинка: Kill Bill
- Настоящий рейтинг: 8,1
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
-
-
- Картинка: The Avengers
- Настоящий рейтинг: 8
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
-
-
- Картинка: Deadpool
- Настоящий рейтинг: 8
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
-
-
- Картинка: The Green Knight
- Настоящий рейтинг: 6,6
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
-
-
- Картинка: Old
- Настоящий рейтинг: 5,8
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: НЕТ
-
-
- Картинка: The Ice Age Adventures of Buck Wild
- Настоящий рейтинг: 4,3
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: НЕТ
-
-
- Картинка: Tesla
- Настоящий рейтинг: 5,1
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: НЕТ
-
-
- Картинка: Vivarium
- Настоящий рейтинг: 5,8
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: НЕТ
- */
