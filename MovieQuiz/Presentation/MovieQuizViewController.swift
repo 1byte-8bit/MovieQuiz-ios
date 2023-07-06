@@ -22,6 +22,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     @IBOutlet private var counterLabel: UILabel!
     @IBOutlet private weak var noButton: UIButton!
     @IBOutlet private weak var yesButton: UIButton!
+    @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
     
     // Делает содержимое статус бара светлым
     override var preferredStatusBarStyle: UIStatusBarStyle {
@@ -159,6 +160,38 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         }
     }
 
+}
+
+extension MovieQuizViewController {
+    private func showLoadingIndicator() {
+        activityIndicator.isHidden = false
+        activityIndicator.startAnimating()
+    }
+    
+    private func hideLoadingIndicator() {
+        activityIndicator.stopAnimating()
+        activityIndicator.isHidden = true
+    }
+}
+
+extension MovieQuizViewController {
+    private func showNetworkError(message: String) {
+        hideLoadingIndicator()
+        
+        let resultMessage = AlertModel(
+            title: "Ошибка",
+            message: message,
+            buttonText: "Попробовать ещё раз",
+            completion: { [weak self] in
+                guard let self = self else { return }
+                self.currentQuestionIndex = 0
+                self.correctAnswers = 0
+                
+                self.questionFactory?.requestNextQuestion()
+            }
+        )
+        presentAlert(model: resultMessage)
+    }
 }
 
 extension MovieQuizViewController {
