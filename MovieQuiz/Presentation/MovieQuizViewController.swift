@@ -1,7 +1,6 @@
 import UIKit
 
 final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
-    
     /*
      Question Factory передана Инъекцией через свойство
      а делегат организован в нем Агрегацией (метод связи)
@@ -36,12 +35,16 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
         imageView.layer.cornerRadius = 20 // радиус скругления углов рамки
         
-        questionFactory = QuestionFactory(delegate: self)
-        questionFactory?.requestNextQuestion()
+        questionFactory = QuestionFactory(moviesLoader: MovieLoader(), delegate: self)
+        statisticService = StatisticServiceImplementation()
+        
+        // Показываем индикатор и загружаем изображение
+        showLoadingIndicator()
+        questionFactory?.loadData()
         
         alertPresenter = AlertPresenter(mainViewController: self)
         
-        statisticService = StatisticServiceImplementation()
+        
     }
     
     // MARK: - Actions
@@ -65,7 +68,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // метод конвертации, который принимает моковый вопрос и возвращает вью модель для экрана вопроса
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
         let question = QuizStepViewModel(
-            image: UIImage(named: model.image) ?? UIImage(),
+            image: UIImage(data: model.image) ?? UIImage(),
             question: model.text,
             questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
         
@@ -163,19 +166,33 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
 }
 
 extension MovieQuizViewController {
+    
+    func didLoadDataFromServer() {
+        hideLoadingIndicator()
+        questionFactory?.requestNextQuestion()
+    }
+    
+    func didFailToLoadData(with error: Error) {
+        showNetworkError(message: error.localizedDescription)
+    }
+}
+
+extension MovieQuizViewController {
+    
     private func showLoadingIndicator() {
         activityIndicator.isHidden = false
         activityIndicator.startAnimating()
     }
     
     private func hideLoadingIndicator() {
-        activityIndicator.stopAnimating()
         activityIndicator.isHidden = true
     }
 }
 
 extension MovieQuizViewController {
+    
     private func showNetworkError(message: String) {
+        
         hideLoadingIndicator()
         
         let resultMessage = AlertModel(
@@ -197,28 +214,5 @@ extension MovieQuizViewController {
 extension MovieQuizViewController {
     func presentAlert(model: AlertModel?) {
         self.present(self, animated: true)
-    }
-}
-
-
-extension MovieQuizViewController {
-    
-    func getMovie(from jsonString: String) -> Top? {
-        
-        var movie: Top? = nil
-        
-        guard let data = jsonString.data(using: .utf8) else {
-            return nil
-        }
-        
-        do {
-            let movieModel = try JSONDecoder().decode(Top.self, from: data)
-
-            movie = movieModel
-        } catch {
-            print("Failed to parse: \(error.localizedDescription)")
-        }
-        
-        return movie
     }
 }
