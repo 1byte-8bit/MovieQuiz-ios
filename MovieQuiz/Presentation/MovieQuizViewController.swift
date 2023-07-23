@@ -35,7 +35,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
         imageView.layer.cornerRadius = 20 // радиус скругления углов рамки
         
-        questionFactory = QuestionFactory(moviesLoader: MovieLoader(), delegate: self)
+        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         statisticService = StatisticServiceImplementation()
         
         // Показываем индикатор и загружаем изображение
@@ -125,6 +125,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             + "Средняя точность: \(String(format: "%.2f", accuracy))%"
             
             let resultMessage = AlertModel(
+                accessibilityId: "Game results",
                 title: "Этот раунд окончен!",
                 message: message,
                 buttonText: "Сыграть еще раз",
@@ -196,6 +197,7 @@ extension MovieQuizViewController {
         hideLoadingIndicator()
         
         let resultMessage = AlertModel(
+            accessibilityId: "Network Error",
             title: "Ошибка",
             message: message,
             buttonText: "Попробовать ещё раз",

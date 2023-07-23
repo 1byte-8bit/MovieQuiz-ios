@@ -23,6 +23,7 @@ class AlertPresenter: UIViewController, AlertPresenterProtocol {
             message: model.message,
             preferredStyle: .alert
         )
+        resultsAlert.view.accessibilityIdentifier = model.accessibilityId
         
         let action = UIAlertAction(title: model.buttonText, style: .default) {
             UIAlertAction in
