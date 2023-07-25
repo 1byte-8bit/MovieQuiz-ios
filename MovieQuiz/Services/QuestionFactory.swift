@@ -74,10 +74,10 @@ class QuestionFactory: QuestionFactoryProtocol {
         var correctAnswer: Bool
         // Создание варианта вопроса
         if sing == "<" {
-            text = "Рейтинг этого фильма меньше чем \(randomNumber)?"
+            text = "Рейтинг этого фильма  меньше чем \(randomNumber)?"
             correctAnswer = rating < Float(randomNumber)
         } else {
-            text = "Рейтинг этого фильма больше чем \(randomNumber)?"
+            text = "Рейтинг этого фильма  больше чем \(randomNumber)?"
             correctAnswer = rating > Float(randomNumber)
         }
         
@@ -93,6 +93,7 @@ class QuestionFactory: QuestionFactoryProtocol {
                 
                 switch result {
                 case .success(let mostPopularMovies):
+                    print(mostPopularMovies)
                     self.movies = mostPopularMovies.items // сохраняем фильм в нашу новую переменную
                     self.delegate?.didLoadDataFromServer() // сообщаем, что данные загрузились
                 case .failure(let error):
@@ -115,6 +116,7 @@ class QuestionFactory: QuestionFactoryProtocol {
            
            do {
                imageData = try Data(contentsOf: movie.resizedImageURL)
+               print(imageData)
             } catch {
                 print("Failed to load image")
             }

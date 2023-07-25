@@ -58,6 +58,10 @@ final class StatisticServiceImplementation: StatisticService {
     // Средняя точность
     var totalAccuracy: Double {
         get {
+            // Проверка totalAmount на неравность 0 перед выполнением подсчета
+            guard totalAmount != 0 else {
+                return 0
+            }
             return Double(totalCorrect) / Double(totalAmount) * 100
         }
     }

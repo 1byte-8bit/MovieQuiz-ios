@@ -7,7 +7,9 @@
 
 import Foundation
 
+/// Модель алерта
 struct AlertModel {
+    /// ID для тестов
     let accessibilityId: String
     let title: String
     let message: String
