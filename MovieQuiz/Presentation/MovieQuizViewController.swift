@@ -23,7 +23,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private var correctAnswers = 0
     
     private var questionFactory: QuestionFactoryProtocol?
-    private var currentQuestion: QuizQuestion?
+    private var currentQuestion: QuizQuestion? ///Remove
     private var alertPresenter: AlertPresenterProtocol?
     private var statisticService: StatisticService?
     private let presenter = MovieQuizPresenter()
@@ -32,6 +32,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        presenter.viewController = self
         
         imageView.layer.cornerRadius = 20 // радиус скругления углов рамки
         // настройка индикатора загрузки
@@ -80,7 +82,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     /// приватный метод, который меняет цвет рамки
-    private func showAnswerResult(isCorrect: Bool) {
+    func showAnswerResult(isCorrect: Bool) {
         noButton.isEnabled = false
         yesButton.isEnabled = false
         
@@ -147,19 +149,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // MARK: - Actions
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
-        guard let currentQuestion = currentQuestion else {
-            return
-        }
-        let answer = true
-        showAnswerResult(isCorrect: currentQuestion.correctAnswer == answer)
+        presenter.currentQuestion = currentQuestion
+        presenter.yesButtonClicked()
     }
 
     @IBAction private func noButtonClicked(_ sender: UIButton) {
-        guard let currentQuestion = currentQuestion else {
-            return
-        }
-        let answer = false
-        showAnswerResult(isCorrect: currentQuestion.correctAnswer == answer)
+        presenter.currentQuestion = currentQuestion
+        presenter.noButtonClicked()
     }
     
 }
