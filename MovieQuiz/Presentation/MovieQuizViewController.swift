@@ -1,6 +1,6 @@
 import UIKit
 
-final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
+final class MovieQuizViewController: UIViewController {
     /*
      Question Factory передана Инъекцией через свойство
      а делегат организован в нем Агрегацией (метод связи)
@@ -19,39 +19,27 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     @IBOutlet weak var yesButton: UIButton!
     @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
     
-    // переменная со счётчиком правильных ответов
-    private var correctAnswers = 0
-    
-    var questionFactory: QuestionFactoryProtocol?
     var alertPresenter: AlertPresenterProtocol?
-    private let presenter = MovieQuizPresenter()
+    
+    private var presenter: MovieQuizPresenter!
     
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        presenter.viewController = self
+//        presenter.viewController = self
+        presenter = MovieQuizPresenter(viewController: self)
+        alertPresenter = AlertPresenter(mainViewController: self)
         
         imageView.layer.cornerRadius = 20 // радиус скругления углов рамки
         // настройка индикатора загрузки
         activityIndicator.style = .large
         activityIndicator.color = .ypWhite
         activityIndicator.hidesWhenStopped = true
-        
-        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
-        
-        // Показываем индикатор и загружаем изображение
-        showLoadingIndicator()
-        questionFactory?.loadData()
-        
-        alertPresenter = AlertPresenter(mainViewController: self)
-        
-        
     }
     
-    // MARK: - Private functions
-    /// приватный метод вывода на экран вопроса
+    /// метод вывода на экран вопроса
     func show(quiz step: QuizStepViewModel) {
         imageView.image = step.image
         textLabel.text = step.question
@@ -61,32 +49,69 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
     }
     
-    /// приватный метод, который меняет цвет рамки
-    func showAnswerResult(isCorrect: Bool) {
-        noButton.isEnabled = false
-        yesButton.isEnabled = false
+    func showResult() {
+        let message = presenter.makeResultsMessage()
+        
+        let resultMessage = AlertModel(
+            accessibilityId: "Game results",
+            title: "Этот раунд окончен!",
+            message: message,
+            buttonText: "Сыграть еще раз",
+            completion: { [weak self] in
+                guard let self = self else { return }
+                self.presenter.restartGame()
+            }
+        )
+        alertPresenter?.showGameResult(with: resultMessage)
+
+    }
+    
+    /// метод меняет состояние кнопок
+    func switchButton(state: Bool) {
+        noButton.isEnabled = state
+        yesButton.isEnabled = state
+    }
+    
+    /// метод, который меняет цвет рамки
+    func highlightImageBorder(isCorrectAnswer: Bool) {
+        switchButton(state: false)
         
         /// метод красит рамку
         imageView.layer.borderWidth = 8
-        if isCorrect {
+        if isCorrectAnswer {
             imageView.layer.borderColor = UIColor.ypGreen.cgColor
-            correctAnswers += 1
         } else {
             imageView.layer.borderColor = UIColor.ypRed.cgColor
         }
-        
-        // запускаем задачу через 1 секунду c помощью диспетчера задач
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            // код, который мы хотим вызвать через 1 секунду
-            guard let self = self else { return }
-            self.presenter.correctAnswers = self.correctAnswers
-            self.presenter.questionFactory = self.questionFactory
-            self.presenter.showNextQuestionOrResults()
-        }
     }
     
-    func didReceiveNextQuestion(question: QuizQuestion?) {
-        presenter.didRecieveNextQuestion(question: question)
+    func presentAlert(model: AlertModel?) {
+        self.present(self, animated: true)
+    }
+    
+    func showLoadingIndicator() {
+        activityIndicator.startAnimating()
+    }
+    
+    func hideLoadingIndicator() {
+        activityIndicator.stopAnimating()
+    }
+    
+    func showNetworkError(message: String) {
+        
+        hideLoadingIndicator()
+        
+        let resultMessage = AlertModel(
+            accessibilityId: "Network Error",
+            title: "Ошибка",
+            message: message,
+            buttonText: "Попробовать ещё раз",
+            completion: { [weak self] in
+                guard let self = self else { return }
+                self.presenter.restartGame()
+            }
+        )
+        alertPresenter?.showGameResult(with: resultMessage)
     }
     
     
@@ -99,57 +124,4 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         presenter.noButtonClicked()
     }
     
-}
-
-
-extension MovieQuizViewController {
-    
-    func didLoadDataFromServer() {
-        showLoadingIndicator()
-        questionFactory?.requestNextQuestion()
-    }
-    
-    func didFailToLoadData(with error: Error) {
-        showNetworkError(message: error.localizedDescription)
-    }
-}
-
-extension MovieQuizViewController {
-    
-    func showLoadingIndicator() {
-        activityIndicator.startAnimating()
-    }
-    
-    func hideLoadingIndicator() {
-        activityIndicator.stopAnimating()
-    }
-}
-
-extension MovieQuizViewController {
-    
-    private func showNetworkError(message: String) {
-        
-        hideLoadingIndicator()
-        
-        let resultMessage = AlertModel(
-            accessibilityId: "Network Error",
-            title: "Ошибка",
-            message: message,
-            buttonText: "Попробовать ещё раз",
-            completion: { [weak self] in
-                guard let self = self else { return }
-                self.presenter.resetQuestionIndex()
-                self.correctAnswers = 0
-                
-                self.questionFactory?.loadData()
-            }
-        )
-        presentAlert(model: resultMessage)
-    }
-}
-
-extension MovieQuizViewController {
-    func presentAlert(model: AlertModel?) {
-        self.present(self, animated: true)
-    }
 }
