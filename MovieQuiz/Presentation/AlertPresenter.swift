@@ -14,7 +14,7 @@ class AlertPresenter: UIViewController, AlertPresenterProtocol {
     func showGameResult(with model: AlertModel?) {
         guard let mainController = mainViewController,
               let model = model else {
-                return
+            return
         }
         
         let resultsAlert = UIAlertController(
@@ -43,5 +43,5 @@ class AlertPresenter: UIViewController, AlertPresenterProtocol {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
 }

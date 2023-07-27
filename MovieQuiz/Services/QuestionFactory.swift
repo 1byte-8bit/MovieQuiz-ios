@@ -16,7 +16,7 @@ class QuestionFactory: QuestionFactoryProtocol {
     private func generateQuestion(with rating: Float) -> (text: String, correctAnswer: Bool) {
         // Experiment on creating various questions
         let arrayOfOperators = ["<", ">"]
-
+        
         let sing = arrayOfOperators.randomElement()
         // Получения рандомного числа методом arc4random_uniform()
         // вместо Int.random(in: 6...9)
@@ -56,7 +56,7 @@ class QuestionFactory: QuestionFactoryProtocol {
                 }
             }
         }
-   }
+    }
     
     func requestNextQuestion() {
         
@@ -68,11 +68,11 @@ class QuestionFactory: QuestionFactoryProtocol {
             guard let movie = self.movies[safe: index] else { return }
             
             var imageData = Data()
-           
+            
             // Запрашиваем картинку определенного размера
             // если не получаем, то оставляем дефолтную
             do {
-               imageData = try Data(contentsOf: movie.resizedImageURL)
+                imageData = try Data(contentsOf: movie.resizedImageURL)
             } catch {
                 print("Failed to load image")
             }
@@ -83,11 +83,11 @@ class QuestionFactory: QuestionFactoryProtocol {
             let question = generateQuestion(with: rating)
             let text = question.text
             let correctAnswer = question.correctAnswer
-
+            
             
             let quizQuestion = QuizQuestion(image: imageData,
-                                         text: text,
-                                         correctAnswer: correctAnswer)
+                                            text: text,
+                                            correctAnswer: correctAnswer)
             
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
@@ -95,7 +95,7 @@ class QuestionFactory: QuestionFactoryProtocol {
             }
         }
     }
-
+    
     
     init(moviesLoader: MoviesLoading, delegate: QuestionFactoryDelegate) {
         self.moviesLoader = moviesLoader

@@ -56,12 +56,13 @@ final class MovieQuizUITests: XCTestCase {
         let secondPoster = app.images["Poster"] // ещё раз находим постер
         let secondPosterData = secondPoster.screenshot().pngRepresentation
         
+        // проверяем, что постеры разные
+        XCTAssertFalse(firstPosterData == secondPosterData)
         
-        XCTAssertFalse(firstPosterData == secondPosterData) // проверяем, что постеры разные
         // Проверяем, что лейбл равен заданному формату
         let indexLabel = app.staticTexts["Index"]
         
-        XCTAssertEqual(indexLabel.label, "1/10")
+        XCTAssertEqual(indexLabel.label, "2/10")
     }
     
     func testNoButton() {

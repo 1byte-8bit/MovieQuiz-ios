@@ -63,11 +63,11 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         correctAnswers = 0
         questionFactory?.requestNextQuestion()
     }
-        
+    
     func resetQuestionIndex() {
         currentQuestionIndex = 0
     }
-        
+    
     func switchToNextQuestion() {
         currentQuestionIndex += 1
     }
@@ -91,7 +91,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     func yesButtonClicked() {
         didAnswer(isYes: true)
     }
-        
+    
     func noButtonClicked() {
         didAnswer(isYes: false)
     }
@@ -109,7 +109,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
             self?.viewController?.show(quiz: viewModel)
         }
     }
-        
+    
     private func didAnswer(isYes: Bool) {
         guard let currentQuestion = currentQuestion else {
             return
@@ -146,7 +146,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         
         viewController?.switchButton(state: true)
         
-      }
+    }
     
     func makeResultsMessage() -> String {
         // идём в состояние "Результат квиза"
