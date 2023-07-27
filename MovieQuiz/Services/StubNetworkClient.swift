@@ -7,15 +7,6 @@
 
 import Foundation
 
-//
-//  StubNetworkClient.swift
-//  MovieQuizTests
-//
-//  Created by Alexandr on 20.07.2023.
-//
-
-import Foundation
-
 struct StubNetworkClient: NetworkRouting {
     
     enum TestError: Error { // тестовая ошибка

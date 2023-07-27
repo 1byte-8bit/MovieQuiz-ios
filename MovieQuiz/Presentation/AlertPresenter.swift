@@ -7,7 +7,6 @@
 
 import UIKit
 
-
 class AlertPresenter: UIViewController, AlertPresenterProtocol {
     
     private weak var mainViewController: UIViewController?

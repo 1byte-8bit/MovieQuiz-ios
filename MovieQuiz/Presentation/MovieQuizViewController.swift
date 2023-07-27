@@ -14,12 +14,6 @@ protocol MovieQuizViewControllerProtocol: AnyObject {
 
 final class MovieQuizViewController: UIViewController, MovieQuizViewControllerProtocol {
     
-    /*
-     Question Factory передана Инъекцией через свойство
-     а делегат организован в нем Агрегацией (метод связи)
-     т.е. через параметр в инициализаторе
-     */
-    
     // Делает содержимое статус бара светлым
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
@@ -40,8 +34,7 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-//        presenter.viewController = self
+
         presenter = MovieQuizPresenter(viewController: self)
         alertPresenter = AlertPresenter(mainViewController: self)
         

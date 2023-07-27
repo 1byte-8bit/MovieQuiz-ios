@@ -7,7 +7,6 @@
 
 import Foundation
 
-
 /// для состояния "Результат квиза"
 struct QuizResultsViewModel {
   /// строка с заголовком алерта
