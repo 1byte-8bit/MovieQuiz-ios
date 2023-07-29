@@ -21,7 +21,22 @@ struct MoviesLoader: MoviesLoading {
     
     // MARK: - URL
     private var mostPopularMoviesUrl: URL {
-        guard let url = URL(string: "https://imdb-api.com/en/API/Top250Movies/k_zcuw1ytf") else {
+        
+        var apiKey: String {
+            get {
+                guard let filePath = Bundle.main.path(forResource: "api", ofType: "plist") else {
+                    fatalError("Couldn't find file 'api.plist'.")
+                }
+                let plist = NSDictionary(contentsOfFile: filePath)
+                guard let value = plist?.object(forKey: "API_KEY") as? String else {
+                      fatalError("Couldn't find key 'API_KEY' in 'api.plist'.")
+                    }
+                
+                return value
+            }
+        }
+        
+        guard let url = URL(string: "https://imdb-api.com/en/API/Top250Movies/\(apiKey)") else {
             preconditionFailure("Unable to construct mostPopularMoviesUrl")
         }
         return url
